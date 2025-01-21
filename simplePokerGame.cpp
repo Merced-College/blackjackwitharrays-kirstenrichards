@@ -1,3 +1,11 @@
+/*
+Skylee Blaine
+Kirsten Richards
+Andrew Doumas
+
+1/21/25
+Reviewing Procedural Programming
+*/
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -5,18 +13,25 @@
 
 using namespace std;
 
+// creating strings for each type of suit and rank of card in a deck
 const string SUITS[] = {"Hearts", "Diamonds", "Clubs", "Spades"};
 const string RANKS[] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
 int DECK[52];
 int currentCardIndex = 0;
+int wins = 0;
+int losses = 0;
+int ties = 0;
 
+// creates deck, populates array with numbers 0-51
 void initializeDeck() {
     for (int i = 0; i < 52; i++) {
         DECK[i] = i;
     }
 }
 
+// shuffels the deck to be in a random order
 void shuffleDeck() {
+    //seeded randomization to prevent game from being repetetive
     srand(time(0));
     for (int i = 0; i < 52; i++) {
         int index = rand() % 52;
@@ -26,14 +41,17 @@ void shuffleDeck() {
     }
 }
 
+//deals card to player/dealer 
 int dealCard() {
     return DECK[currentCardIndex++] % 13;
 }
 
+// determines card value
 int cardValue(int card) {
     return card < 9 ? card + 2 : 10;
 }
 
+// identifies and prints 2 of the player's cards (rank and suit)
 int dealInitialPlayerCards() {
     int card1 = dealCard();
     int card2 = dealCard();
@@ -41,21 +59,23 @@ int dealInitialPlayerCards() {
     return cardValue(card1) + cardValue(card2);
 }
 
+// identifies and prints the dealer's card (rank and suit)
 int dealInitialDealerCards() {
     int card1 = dealCard();
     cout << "Dealer's card: " << RANKS[card1 % 13] << " of " << SUITS[card1 / 13] << endl;
     return cardValue(card1);
 }
 
+// begins player turn (hit or stand)
 int playerTurn(int playerTotal) {
     while (true) {
         cout << "Your total is " << playerTotal << ". Do you want to hit or stand?" << endl;
         string action;
-        getline(cin, action);
+        getline(cin, action); //user input (only takes hit or stand)
         if (action == "hit") {
             int newCard = dealCard();
             playerTotal += cardValue(newCard);
-            cout << "You drew a " << RANKS[newCard % 13] << " of " << SUITS[newCard / 13] << endl;
+            cout << "You drew a " << RANKS[newCard % 13] << " of " << SUITS[newCard / 13] << endl; //return random card
             if (playerTotal > 21) {
                 break;
             }
@@ -68,8 +88,10 @@ int playerTurn(int playerTotal) {
     return playerTotal;
 }
 
+// dealers turn, draws new card, adds to dealerTotal
+// algorithm for dealer's turn
 int dealerTurn(int dealerTotal) {
-    while (dealerTotal < 17) {
+    while (dealerTotal < 17) { // dealer draws if total is less than 17
         int newCard = dealCard();
         dealerTotal += cardValue(newCard);
     }
@@ -77,30 +99,108 @@ int dealerTurn(int dealerTotal) {
     return dealerTotal;
 }
 
+// compares playerTotal and dealerTotal
+// prints win, tie, or dealer win
+// determines who wins 
 void determineWinner(int playerTotal, int dealerTotal) {
     if (dealerTotal > 21 || playerTotal > dealerTotal) {
         cout << "You win!" << endl;
+        add_wins();
     } else if (dealerTotal == playerTotal) {
         cout << "It's a tie!" << endl;
+        add_tie();
     } else {
         cout << "Dealer wins!" << endl;
+        add_losses();
     }
 }
 
+void add_win(){
+    wins++;
+}
+
+void add_losses(){
+    losses++;
+}
+
+void add_tie(){
+    ties++;
+}
+
 int main() {
+
+    //calls functions to create and shuffle the deck of cards 
     initializeDeck();
     shuffleDeck();
   
-    int playerTotal = dealInitialPlayerCards();
-    int dealerTotal = dealInitialDealerCards();
-  
+    //deals initial cards to player/dealer 
+    int playerTotal;
+    int dealerTotal;
+
+    bool play_game = true;
+    bool player_choice = true;
+    bool player_bust = false;
+    string play_again;
+
+
+while(play_game){
+       playerTotal = dealInitialPlayerCards();
+       dealerTotal = dealInitialDealerCards();
+
+       player_bust = true;
+    // if player total is greater than 21, results in a bust
+    // player turn happens here
     playerTotal = playerTurn(playerTotal);
+    //checks if player total is greater than 21
     if (playerTotal > 21) {
       cout << "You busted! Dealer wins." << endl;
-      return 0;
+      add_losses();
+      player_bust = true;
     }
+
+    //dealers turn happens here, calls dealerTurn function
     dealerTotal = dealerTurn(dealerTotal);
+
+    if(player_bust == false){
+    //checks who wins the game
     determineWinner(playerTotal, dealerTotal);
+    }
+
+
+    // asks the player if they would like to play again
+    player_choice = true;
+    while(player_choice){
+      cout<<'\n'<< "Would you like to play again?"<<'\n'<<"Please enter either yes or no"<<endl;
+
+      // gets player choice and converts string to lowercase
+      play_again = "";
+      cin>> play_again;
+      std::transform(play_again.begin(), play_again.end(), play_again.begin(), ::tolower); 
+
+      
+      
+      if(play_again == "yes" || play_again == "no"){
+        cout<< play_again<<endl;
+        player_choice = false;
+        if(play_again == "no"){
+          player_choice = false;
+          play_game = false;
+        }
+      }
+      else{
+        cout<<"Something went wrong..."<<endl;
+
+      
+      }
+    }
+
+}
   
+    //outputs win, loss, and tie stats
+    cout<<"You won: "<< wins<<" times" <<endl;
+    cout<<"You lost: "<< losses<<" times"<<endl;
+    cout<<"You tied: "<< ties<<" times" <<endl;
+
     return 0;
 }
+
