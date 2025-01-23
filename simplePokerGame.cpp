@@ -123,9 +123,6 @@ void add_losses(){
     losses++;
 }
 
-void add_tie(){
-    ties++;
-}
 
 int main() {
 
