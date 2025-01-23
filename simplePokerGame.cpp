@@ -22,6 +22,7 @@ int wins = 0;
 int losses = 0;
 int ties = 0;
 
+
 // creates deck, populates array with numbers 0-51
 void initializeDeck() {
     for (int i = 0; i < 52; i++) {
@@ -99,6 +100,18 @@ int dealerTurn(int dealerTotal) {
     return dealerTotal;
 }
 
+void add_wins(){
+    wins++;
+}
+
+void add_losses(){
+    losses++;
+}
+
+void add_ties(){
+    ties++;
+}
+
 // compares playerTotal and dealerTotal
 // prints win, tie, or dealer win
 // determines who wins 
@@ -106,21 +119,16 @@ void determineWinner(int playerTotal, int dealerTotal) {
     if (dealerTotal > 21 || playerTotal > dealerTotal) {
         cout << "You win!" << endl;
         add_wins();
+
     } else if (dealerTotal == playerTotal) {
         cout << "It's a tie!" << endl;
-        add_tie();
+        add_ties();
+
     } else {
         cout << "Dealer wins!" << endl;
         add_losses();
+
     }
-}
-
-void add_win(){
-    wins++;
-}
-
-void add_losses(){
-    losses++;
 }
 
 
@@ -172,7 +180,7 @@ while(play_game){
       // gets player choice and converts string to lowercase
       play_again = "";
       cin>> play_again;
-      std::transform(play_again.begin(), play_again.end(), play_again.begin(), ::tolower); 
+      //std::transform(play_again.begin(), play_again.end(), play_again.begin(), ::tolower); 
 
       
       
