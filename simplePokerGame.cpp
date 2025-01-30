@@ -10,6 +10,7 @@ Reviewing Procedural Programming
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 
 using namespace std;
 
@@ -21,13 +22,57 @@ int currentCardIndex = 0;
 int wins = 0;
 int losses = 0;
 int ties = 0;
+int chips = 100;
+int player_bet = 0;
 
-
+//increases win count
+void add_win(){
+    wins++;
+}
+//increases loss count
+void add_losses(){
+    losses++;
+}
+//increases tie count
+void add_tie(){
+    ties++;
+}
 // creates deck, populates array with numbers 0-51
 void initializeDeck() {
     for (int i = 0; i < 52; i++) {
         DECK[i] = i;
     }
+}
+
+//function to add chips on player win
+void add_chips(){
+    chips += player_bet*1.5;
+}
+
+//function to remove chips on player loss
+void remove_chips(){
+    chips -= player_bet;
+}
+
+//function to handle betting process
+void betting(){
+    
+    bool betting = true;
+
+    // loop for betting to make sure valid number is entered
+    while(betting){
+        cout<<"how many chips would you like to bet?"<<endl;
+        cin>> player_bet;
+
+        if(player_bet < 1){
+            cout<<"please enter an amount greater than 0" ;
+        }
+        else{
+            betting = false;
+        }
+    }
+    
+    cout<< "you bet: "<<player_bet <<"chip(s)"<<endl;
 }
 
 // shuffels the deck to be in a random order
@@ -44,7 +89,7 @@ void shuffleDeck() {
 
 //deals card to player/dealer 
 int dealCard() {
-    return DECK[currentCardIndex++] % 13;
+    return DECK[currentCardIndex++] % 52;
 }
 
 // determines card value
@@ -69,8 +114,13 @@ int dealInitialDealerCards() {
 
 // begins player turn (hit or stand)
 int playerTurn(int playerTotal) {
+    cout << "Your total is " << playerTotal << endl;
+    betting();
+
+
     while (true) {
-        cout << "Your total is " << playerTotal << ". Do you want to hit or stand?" << endl;
+        cout << "Your total is " << playerTotal<<"." << endl;
+        cout<<"Do you want to hit or stand?" << endl;
         string action;
         getline(cin, action); //user input (only takes hit or stand)
         if (action == "hit") {
@@ -100,37 +150,23 @@ int dealerTurn(int dealerTotal) {
     return dealerTotal;
 }
 
-void add_wins(){
-    wins++;
-}
-
-void add_losses(){
-    losses++;
-}
-
-void add_ties(){
-    ties++;
-}
-
 // compares playerTotal and dealerTotal
 // prints win, tie, or dealer win
 // determines who wins 
 void determineWinner(int playerTotal, int dealerTotal) {
     if (dealerTotal > 21 || playerTotal > dealerTotal) {
         cout << "You win!" << endl;
-        add_wins();
-
+        add_win();
+        add_chips();
     } else if (dealerTotal == playerTotal) {
         cout << "It's a tie!" << endl;
-        add_ties();
-
+        add_tie();
     } else {
         cout << "Dealer wins!" << endl;
         add_losses();
-
+        remove_chips();
     }
 }
-
 
 int main() {
 
@@ -141,18 +177,19 @@ int main() {
     //deals initial cards to player/dealer 
     int playerTotal;
     int dealerTotal;
+   
 
     bool play_game = true;
     bool player_choice = true;
     bool player_bust = false;
     string play_again;
 
-
+cout<<"You have "<<chips<<" chip(s)"<<endl;
 while(play_game){
        playerTotal = dealInitialPlayerCards();
        dealerTotal = dealInitialDealerCards();
 
-       player_bust = true;
+    player_bust = false;
     // if player total is greater than 21, results in a bust
     // player turn happens here
     playerTotal = playerTurn(playerTotal);
@@ -160,6 +197,7 @@ while(play_game){
     if (playerTotal > 21) {
       cout << "You busted! Dealer wins." << endl;
       add_losses();
+      remove_chips();
       player_bust = true;
     }
 
@@ -171,16 +209,26 @@ while(play_game){
     determineWinner(playerTotal, dealerTotal);
     }
 
+    //tell player amount of chips they have
+    cout<<"you have "<< chips<<" chips."<<endl;
+    cout<<endl;
 
     // asks the player if they would like to play again
     player_choice = true;
+
+    if(chips<=0){
+        cout<<"You have run out of chips, good bye."<<endl;
+        player_choice = false;
+        play_game = false;
+    }
+
     while(player_choice){
       cout<<'\n'<< "Would you like to play again?"<<'\n'<<"Please enter either yes or no"<<endl;
 
       // gets player choice and converts string to lowercase
       play_again = "";
       cin>> play_again;
-      //std::transform(play_again.begin(), play_again.end(), play_again.begin(), ::tolower); 
+      std::transform(play_again.begin(), play_again.end(), play_again.begin(), ::tolower); 
 
       
       
@@ -201,11 +249,11 @@ while(play_game){
 
 }
   
-    //outputs win, loss, and tie stats
-    cout<<"You won: "<< wins<<" times" <<endl;
-    cout<<"You lost: "<< losses<<" times"<<endl;
-    cout<<"You tied: "<< ties<<" times" <<endl;
+    //outputs chips, win, loss, and tie stats
+    cout<<"you walked away with "<<chips<<" chip(s)."<<endl;
+    cout<<"You won: "<< wins<<" time(s)." <<endl;
+    cout<<"You lost: "<< losses<<" time(s)."<<endl;
+    cout<<"You tied: "<< ties<<" time(s)." <<endl;
 
     return 0;
 }
-
